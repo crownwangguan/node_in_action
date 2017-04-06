@@ -16,8 +16,8 @@ Chat.prototype.changeRoom = function(room) {
     });
 };
 
-Chat.prototype.processCommand = function(command) {
-    let words = command.split(' ');
+Chat.prototype.processCommand = function(comm) {
+    let words = comm.split(' ');
     let command = words[0].substring(1, words[0].length).toLowerCase();
     let message = false;
     switch(command) {
