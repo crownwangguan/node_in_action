@@ -1,0 +1,3 @@
+http://www.cbc.ca/cmlink/rss-topstories
+http://rss.cbc.ca/lineup/world.xml
+http://rss.cbc.ca/lineup/canada-montreal.xml
