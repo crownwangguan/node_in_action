@@ -10,11 +10,14 @@ photos.push({
     path: 'https://nodejs.org/images/ryan-speaker.jpg'
 });
 
-exports.list = function(req, res) {
-    res.render('photos', {
-        title: 'Photos',
-        photos: photos
-    });
+exports.list = function(req, res, next) {
+    Photo.find({}, (err, photos) => {
+        if (err) return next(err);
+        res.render('photos', {
+            title: 'Photos',
+            photos: photos
+        });
+    })
 };
 
 exports.form = function(req, res) {
@@ -34,7 +37,7 @@ var storage = multer.diskStorage({
 		callback(null, './public/photos')
 	},
 	filename: function(req, file, callback) {
-		callback(null, req.body.photo.name)
+		callback(null, req.body.photo.name+'.jpg')
 	}
 })
 
@@ -54,7 +57,7 @@ exports.submit = function(dir) {
             if(err){
                 console.log(err)
             }
-            var new_image = new Photo({name: req.body.photo.name, path: './public/photos/'+req.body.photo.name});
+            var new_image = new Photo({name: req.body.photo.name, path: '/home/guan/Documents/node_in_action/lesson14/photo/public/photos/' + req.body.photo.name});
             new_image.save(err => {
                 if (err) return next(err);
 
