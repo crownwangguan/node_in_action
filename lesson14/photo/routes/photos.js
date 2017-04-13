@@ -57,12 +57,25 @@ exports.submit = function(dir) {
             if(err){
                 console.log(err)
             }
-            var new_image = new Photo({name: req.body.photo.name, path: '/home/guan/Documents/node_in_action/lesson14/photo/public/photos/' + req.body.photo.name});
+            var new_image = new Photo({name: req.body.photo.name, path: req.body.photo.name});
             new_image.save(err => {
                 if (err) return next(err);
 
                 res.redirect('/');
             })
+        });
+    }
+}
+
+exports.download = function(dir) {
+    return function(req, res, next) {
+        var id = req.params.id;
+        console.log(id)
+        Photo.findById(id, (err, photo) => {
+            if (err) return next(err);
+            var path = join(dir, photo.path + '.jpg');
+            // res.sendfile(path);
+            res.download(path, photo.name + '.jpg')
         });
     }
 }
