@@ -8,14 +8,13 @@ const db = mysql .createConnection({
     database: 'guandb'
 });
 
-db.connect();
-
 const saltRounds = 12;
 const _hashPassword = function(password) {
     return bcrypt.hash(password, saltRounds);
 };
 
 const saveUser = function(name, password, age) {
+    db.connect();
     let new_user = {
         name: name,
         age: age,
@@ -40,31 +39,64 @@ const saveUser = function(name, password, age) {
 };
 
 const getByName = function(name, callback) {
+    db.connect();
     let queryString = `SELECT * FROM user WHERE name='${name}';`
     db.query(queryString, (err, result) => {
         if(err) {
+            console.error(err);
             return callback(err);
         } else {
-            callback(result);
+            if (typeof result !== 'undefined' && result.length > 0) {
+                db.end();
+                return callback(null, result);
+            } else {
+                db.end();
+                return callback('No user found', null);
+            }
+        }
+    });
+};
+
+const _getPasswordByName = function(name, callback) {
+    db.connect();
+    let queryString = `SELECT CONVERT(password USING utf8) as _pass FROM user WHERE name='${name}';`
+    db.query(queryString, (err, result) => {
+        if(err) {
+            console.error(err);
+            return callback(err);
+        } else {
+            if (typeof result !== 'undefined' && result.length > 0) {
+                return callback(null, result);
+            } else {
+                return callback('No user found', null);
+            }
         }
     });
 };
 
 const authenticate = function(name, pass) {
-    getByName(name, user => {
-        if(!user) return console.log('no user found');
-        bcrypt.hash(pass, saltRounds, hash => {
-            if(hash == user.password) {
-                console.log(user);
+    _getPasswordByName(name, (err, user) => {
+        if(err) {
+            console.error(err);
+            return db.end();
+        }
+        
+        bcrypt.compare(pass, user[0]._pass, (err, result) => {
+            if (err) { throw (err); }
+            if (result) {
+                console.log('Login successfully.');
+            } else {
+                console.log('Wrong password.');
             }
+            db.end();
         });
     });
 };
 
-saveUser('guaan', '12345', 25);
+// saveUser('asdf', '12345', 25);
 
-getByName('guaan', (result) => {
-    console.log(result)
-});
+// getByName('guaan', (err, result) => {
+//     console.log(result)
+// });
 
-authenticate('guaan', '1234d5')
+authenticate('asdf', '12345');
